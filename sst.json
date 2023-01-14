@@ -1,0 +1,5 @@
+{
+  "name": "btc-intrinsic",
+  "region": "eu-west-1",
+  "main": "stacks/index.ts"
+}
