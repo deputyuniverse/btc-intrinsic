@@ -1,13 +1,29 @@
-import fetch from "node-fetch";
+import { getCDS5y, getCountryInsuranceValue } from "../core/model";
+import { DynamoDBAdapter} from "../adapters/DynamoDB";
 
 export async function main() {
-  const weather = await checkSFWeather();
-  console.log(weather.consolidated_weather[0]);
+  const insuranceValue = await runCountry('usa');
+  console.log(insuranceValue);
   return {};
 }
 
-function checkSFWeather() {
-  return fetch("https://www.metaweather.com/api/location/2487956/").then(
-    (res) => res.json()
-  );
+async function runCountry(country: string) {
+  try {
+    // define adapter
+    const adapter = new DynamoDBAdapter("CDS");
+    const currentDate = new Date().toISOString().slice(0,10);
+
+    // save cds5yPrice
+    const cds5yPrice = await getCDS5y(country);
+    console.log(cds5yPrice)
+    adapter.put(country, currentDate, "cds_5y_price", cds5yPrice);
+
+    // save insuranceValue
+    const totalCountryDebt = adapter.get(country, currentDate);
+    const insuranceValue = getCountryInsuranceValue(totalCountryDebt, cds5yPrice);
+    adapter.put(country, currentDate, "insurance_value", insuranceValue);
+    return insuranceValue;
+  } catch (err) {
+    console.error(err);
+  }
 }

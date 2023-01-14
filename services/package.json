@@ -5,6 +5,7 @@
   "scripts": {},
   "dependencies": {
     "aws-sdk": "^2.1295.0",
+    "investing-com-api": "^4.3.0",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
