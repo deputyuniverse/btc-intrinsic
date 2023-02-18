@@ -9,48 +9,50 @@ export class DynamoDBAdapter {
         this.tableName = tableName;
     }
 
-    async get(partitionKey: string, date: string): Promise<any> {
+    async get(country: string, date: string, numericColumnName: string): Promise<any> {
         try {
             const params = {
                 TableName: this.tableName,
                 Key: {
-                    partitionKey: { S: partitionKey },
-                    sortKey: { S: date }
+                    country: { S: country },
+                    date: { S: date }
                 }
             };
             const data = await this.dynamo.getItem(params).promise();
             if(!data.Item){
               const queryParams = {
                 TableName: this.tableName,
-                KeyConditionExpression: "partitionKey = :pk",
+                KeyConditionExpression: "country = :pk",
                 ExpressionAttributeValues: {
-                    ":pk": { S: partitionKey }
+                    ":pk": { S: country }
                 },
                 ScanIndexForward: false,
                 Limit: 1
               };
               const queryResults = await this.dynamo.query(queryParams).promise();
               if(queryResults.Items && queryResults.Items.length > 0){
-                return queryResults.Items[0];
+                return queryResults.Items[0][numericColumnName].N;
               }
             }
-            return data.Item;
+            else {
+                await data.Item[numericColumnName].N;
+            }
+            
         } catch (err) {
             console.error(err);
             return null;
         }
     }
     
-    async put(partitionKey: string, sortKey: string, field: string, value: any): Promise<void> {
+    async put(country: string, date: string, field: string, value: any): Promise<void> {
         const params = {
             TableName: this.tableName,
             Item: {
-                partitionKey: { S: partitionKey },
-                sortKey: { S: sortKey },
-                [field]: { S: value }
+                country: { S: country },
+                date: { S: date },
+                [field]: { N: `${value}`}
             }
         };
-    
         try {
             await this.dynamo.putItem(params).promise();
         } catch (err) {

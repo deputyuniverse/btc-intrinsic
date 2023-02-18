@@ -1,8 +1,11 @@
-import { Cron, StackContext } from "@serverless-stack/resources";
+import { Cron, StackContext, use } from "@serverless-stack/resources";
 
 export function CronStack({ stack }: StackContext) {
-  new Cron(stack, "Cron", {
-    schedule: "rate(1 minute)",
+
+  const cron = new Cron(stack, "Cron", {
+    schedule: "cron(0 5 * * ? *)",
     job: "functions/lambda.main",
   });
+
+  cron.attachPermissions(['dynamodb'])
 }
