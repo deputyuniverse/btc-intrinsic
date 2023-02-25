@@ -1,3 +1,5 @@
+import { DynamoDBAdapter} from "../adapters/DynamoDB";
+
 export async function getCDS5y(country: string) {
     const { investing } = require('investing-com-api');
     try {
@@ -10,8 +12,30 @@ export async function getCDS5y(country: string) {
 }
 
 export async function getCountryInsuranceValue(totalDebt: number, cds5yPrice: number): Promise<number> {
-    const adjustedCDS = (cds5yPrice * 4) / 100
+    const adjustedCDS = (cds5yPrice * 4) / 10000
     return adjustedCDS * totalDebt;
 }
+
+export async function runCountryForDay(country: string, date: string) {
+    try {
+      // define adapter
+      const cdsAdapter = new DynamoDBAdapter("dev-btc-intrinsic-CDS");
+      const debtAdapter = new DynamoDBAdapter("dev-btc-intrinsic-Debt");
+      const insuranceAdapter = new DynamoDBAdapter("dev-btc-intrinsic-Insurance")
+      
+  
+      // save cds5yPrice
+      const cds5yPrice = await getCDS5y(country);
+      cdsAdapter.put(country, date, "cds_5y_price", cds5yPrice);
+  
+      // save insuranceValue
+      const totalCountryDebt = await debtAdapter.get(country, date, 'value');
+      const insuranceValue = await getCountryInsuranceValue(totalCountryDebt, cds5yPrice);
+      insuranceAdapter.put(country, date, "value", insuranceValue);
+      return insuranceValue;
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
 

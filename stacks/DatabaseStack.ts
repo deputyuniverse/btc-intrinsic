@@ -5,13 +5,21 @@ export function DatabaseStack({ stack }: StackContext) {
     fields: {
         country: "string",
         date: "string",
-        cds_5y_price: "number",
-        insurance_value: "number"
+        cds_5y_price: "number"
     },
     primaryIndex: { partitionKey: "country", sortKey: "date" },
     });
 
     new Table(stack, "Debt", {
+    fields: {
+        country: "string",
+        date: "string",
+        value: "number"
+    },
+    primaryIndex: { partitionKey: "country", sortKey: "date" },
+    });
+
+    new Table(stack, "Insurance", {
     fields: {
         country: "string",
         date: "string",
