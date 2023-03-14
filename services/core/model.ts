@@ -19,7 +19,7 @@ export async function getCountryInsuranceValue(totalDebt: number, cds5yPrice: nu
 export async function runCountryForDay(country: string, date: string) {
     try {
       // define adapter
-      const environment = process.env.STAGE
+      const environment = process.env.SST_STAGE
       const cdsAdapter = new DynamoDBAdapter(`${environment}-btc-intrinsic-CDS`);
       const debtAdapter = new DynamoDBAdapter(`${environment}-btc-intrinsic-Debt`);
       const insuranceAdapter = new DynamoDBAdapter(`${environment}-btc-intrinsic-Insurance`)
